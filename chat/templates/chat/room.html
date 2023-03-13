@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    
+    {% if messages %}
+    <div class="list-group" id="list-group">
+      {% for message in messages %}
+      <span class="list-group-item list-group-item-action active mb-3">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ message.user.username }}</h5>
+          <small>{{ message.created_at.date }}</small>
+        </div>
+        <p class="mb-1">{{ message.text }}</p>
+        {# <small>And some small print.</small> #}
+      </span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    
+    <input id="chat-message-input" type="text" class="form-control"><br>
+    <input id="chat-message-submit" type="button" value="Send">
+    <div id="message"></div>
+</div>
+        
+{{ room.name|json_script:"room-name" }}
+{{ room.id|json_script:"room-id" }}
+{{ request.user.username|json_script:"user_username" }}
+<script>
+    const roomName = JSON.parse(document.getElementById('room-name').textContent);
+    const user_username = JSON.parse(document.getElementById('user_username').textContent);
+    const room_id = JSON.parse(document.getElementById('room-id').textContent);
+    
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/chat/'
+        + roomName
+        + '/'
+    );
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // const date = Date(data.date);
+        let messages = document.getElementById("list-group");
+        
+        messages.insertAdjacentHTML("beforeend", `
+                <span class="list-group-item list-group-item-action active mb-3">
+                    <div class="d-flex w-100 justify-content-between">
+                      <h5 class="mb-1">${data.username}</h5>
+                      <small>${data.date}</small>
+                    </div>
+                    <p class="mb-1">${data.message}</p>
+                </span>`
+            );
+        // $("#list-group").append(temp);
+        // document.querySelector('#chat-log').value += (`${data.username} \n${data.message} \n\n`);
+        // document.querySelector('#chat-log').value += (data.username + "\n" + data.message + "\n\n");
+    };
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) { // enter, return
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'username': user_username,
+            'room_id': room_id
+        }));
+        messageInputDom.value = '';
+    };
+</script>
+{% endblock %}

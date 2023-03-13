@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %} 
+
+
+{% block content %}
+
+<div class="container mt-5">
+    {% if form.errors %}
+        {% for error in form.errors %}
+        <div class="alert alert-info">{{ error }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="POST" class="form-group">
+        {% csrf_token %}
+        
+        {% render_field form.username class="form-control mt-3" placeholder="Username" %}
+        {% render_field form.password1 class="form-control mt-3" placeholder="Password" %}
+        {% render_field form.password2 class="form-control mt-3" placeholder="Confirm password" %}
+        
+        <div class="text-center mt-3">
+            <input type="submit" class="btn btn-primary" value="Sign Up">
+            <input type="hidden" name="next" value="{{ next }}">
+        </div>
+    </form>
+</div>
+{% endblock %}

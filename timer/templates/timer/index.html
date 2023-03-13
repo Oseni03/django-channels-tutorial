@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container text-center my-5">
+    <h1 id="time">Timer</h1>
+    <h1 id="app">Show here</h1>
+</div>
+
+<script>
+    
+    var socket = new WebSocket('ws://' + window.location.host + '/ws/timer/');
+    socket.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        document.querySelector("#app").innerHTML = data.message;
+    };
+</script>
+{% endblock %}
