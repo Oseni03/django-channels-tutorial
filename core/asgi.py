@@ -7,6 +7,7 @@ from django.core.asgi import get_asgi_application
 
 from chat import routing as chat_routing
 from timer import routing as timer_routing
+from graph import routing as graph_routing
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
@@ -18,6 +19,7 @@ django_asgi_app = get_asgi_application()
 urls = []
 urls += chat_routing.websocket_urlpatterns 
 urls += timer_routing.ws_urlpatterns 
+urls += graph_routing.ws_urlpatterns 
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
